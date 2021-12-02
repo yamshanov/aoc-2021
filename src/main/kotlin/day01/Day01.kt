@@ -9,13 +9,15 @@ fun main() {
 }
 
 fun part1(input: List<Int>): Int {
-    return input
+    return input.asSequence()
         .windowed(2)
         .count { it[0] < it[1] }
 }
 
 fun part2(input: List<Int>): Int {
-    return input
-        .windowed(4)
-        .count { it.subList(0, 3).sum() < it.subList(1, 4).sum() }
+    return input.asSequence()
+        .windowed(3)
+        .map { it.sum() }
+        .windowed(2)
+        .count { it[0] < it[1] }
 }
