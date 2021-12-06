@@ -1,34 +1,28 @@
 package day06
 
 import readInput
-import java.util.LinkedList
 
 const val CYCLE_DAYS = 7
-const val INITIAL = 8
+const val FIRST_CYCLE_DAYS = CYCLE_DAYS + 2
 
-data class Fish(val initial: Int, val startDay: Int) {
-    fun simulate(days: Int): List<Fish> =
-        ((startDay + initial + 1)..days step CYCLE_DAYS).map { Fish(INITIAL, it) }
-}
-
-fun parse(input: String): List<Fish> = input.split(",").map { it.toInt() }.map { Fish(it, 0) }
-
-fun part1(fish: List<Fish>, days: Int): Int {
-    val fishPool = LinkedList(fish)
-    var fishCount = 0
-
-    while (!fishPool.isEmpty()) {
-        val f = fishPool.remove()
-        fishCount++
-        fishPool.addAll(f.simulate(days))
+fun countFish(initialFishAges: List<Int>, days: Int): Long {
+    val fishCount = LongArray(days) { initialFishAges.size.toLong() }
+    val newFish = LongArray(days)
+    for (age in initialFishAges) {
+        for (d in age until days step CYCLE_DAYS) newFish[d]++
     }
 
-    return fishCount
+    for (day in 0 until days) {
+        for (i in (day + FIRST_CYCLE_DAYS) until days step CYCLE_DAYS) newFish[i] += newFish[day]
+        for (i in day until days) fishCount[i] += newFish[day]
+    }
+
+    return fishCount[days - 1]
 }
 
 fun main() {
-    val input = readInput("day06/input").first()
-    val fish = parse(input)
+    val input = readInput("day06/input").first().split(",").map { it.toInt() }
 
-    println(part1(fish, 80))
+    println(countFish(input, 80))  // part 1
+    println(countFish(input, 256)) // part 2
 }
