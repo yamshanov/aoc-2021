@@ -10,17 +10,15 @@ data class Cuboid(val on: Boolean, val x1: Int, val x2: Int, val y1: Int, val y2
 
     fun countOn(): Long = if (on) (x2 - x1 + 1L) * (y2 - y1 + 1L) * (z2 - z1 + 1L) else 0
 
-    fun remove(other: Cuboid): List<Cuboid> {
-        var parts = listOf(this)
-        parts = parts.flatMap { it.cutX(other.x1, false) }
-        parts = parts.flatMap { it.cutX(other.x2, true) }
-        parts = parts.flatMap { it.cutY(other.y1, false) }
-        parts = parts.flatMap { it.cutY(other.y2, true) }
-        parts = parts.flatMap { it.cutZ(other.z1, false) }
-        parts = parts.flatMap { it.cutZ(other.z2, true) }
-
-        return parts.filterNot { it.isInside(other) }
-    }
+    fun remove(other: Cuboid): List<Cuboid> = sequenceOf(this)
+        .flatMap { it.cutX(other.x1, false) }
+        .flatMap { it.cutX(other.x2, true) }
+        .flatMap { it.cutY(other.y1, false) }
+        .flatMap { it.cutY(other.y2, true) }
+        .flatMap { it.cutZ(other.z1, false) }
+        .flatMap { it.cutZ(other.z2, true) }
+        .filterNot { it.isInside(other) }
+        .toList()
 
     private fun cutX(x: Int, includeInFirst: Boolean): List<Cuboid> = if (x !in x1..x2) {
         listOf(this)
@@ -76,9 +74,8 @@ fun countOn(cuboids: List<Cuboid>): Long = combine(cuboids).sumOf { it.countOn()
 
 fun combine(cuboids: List<Cuboid>): List<Cuboid> {
     var combined = listOf<Cuboid>()
-    for ((line, cuboid) in cuboids.withIndex()) {
+    for (cuboid in cuboids) {
         combined = add(cuboid, combined)
-        println("Processed line $line. Cuboids count = ${combined.size}")
     }
 
     return combined
